@@ -13,7 +13,7 @@ class SensorFactory(GstRtspServer.RTSPMediaFactory):
         super(SensorFactory, self).__init__(**properties)
         self.cap = cv2.VideoCapture(0)
         self.number_frames = 0
-        self.fps = 30
+        self.fps = 60
         self.duration = 1 / self.fps * Gst.SECOND  # duration of a frame in nanoseconds
         self.launch_string = 'appsrc name=source is-live=true block=true format=GST_FORMAT_TIME ' \
                              'caps=video/x-raw,format=BGR,width=640,height=480,framerate={}/1 ' \
@@ -34,9 +34,9 @@ class SensorFactory(GstRtspServer.RTSPMediaFactory):
                 buf.offset = timestamp
                 self.number_frames += 1
                 retval = src.emit('push-buffer', buf)
-                print('pushed buffer, frame {}, duration {} ns, durations {} s'.format(self.number_frames,
-                                                                                       self.duration,
-                                                                                       self.duration / Gst.SECOND))
+                # print('pushed buffer, frame {}, duration {} ns, durations {} s'.format(self.number_frames,
+                #                                                                        self.duration,
+                #                                                                        self.duration / Gst.SECOND))
                 if retval != Gst.FlowReturn.OK:
                     print(retval)
 
@@ -52,6 +52,8 @@ class SensorFactory(GstRtspServer.RTSPMediaFactory):
 class GstServer(GstRtspServer.RTSPServer):
     def __init__(self, **properties):
         super(GstServer, self).__init__(**properties)
+        self.set_address("192.168.43.159")
+        self.set_service("8080")
         self.factory = SensorFactory()
         self.factory.set_shared(True)
         self.get_mount_points().add_factory("/test", self.factory)

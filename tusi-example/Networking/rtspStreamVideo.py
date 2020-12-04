@@ -16,7 +16,7 @@ class TestRtspMediaFactory(GstRtspServer.RTSPMediaFactory):
 
     def do_create_element(self, url):
         #set mp4 file path to filesrc's location property
-        src_demux = "filesrc location=/tusi-examples/video/TestVid01.MP4 ! qtdemux name=demux"
+        src_demux = "filesrc location=/tusi-examples/video/Brownies01.MP4 ! qtdemux name=demux"
         h264_transcode = "demux.video_0"
         #uncomment following line if video transcoding is necessary
         #h264_transcode = "demux.video_0 ! decodebin ! queue ! x264enc"
@@ -27,6 +27,8 @@ class TestRtspMediaFactory(GstRtspServer.RTSPMediaFactory):
 class GstreamerRtspServer():
     def __init__(self):
         self.rtspServer = GstRtspServer.RTSPServer()
+        self.rtspServer.set_address("192.168.43.159")
+        self.rtspServer.set_service("8080")
         factory = TestRtspMediaFactory()
         factory.set_shared(True)
         mountPoints = self.rtspServer.get_mount_points()
