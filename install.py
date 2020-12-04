@@ -2,6 +2,8 @@ import argparse
 import os
 import subprocess
 import sys
+import sysconfig
+import pathlib
 
 
 def is_virtual_env() -> bool:
@@ -9,6 +11,11 @@ def is_virtual_env() -> bool:
             (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) or
             os.getenv('CONDA_PREFIX'))
 
+def is_msys2_env() -> bool:
+    return (sysconfig.get_platform() == "mingw")
+
+def check_msys64_installed() ->bool:
+    return (os.path.exists(pathlib.Path.home().drive+"\msys64"))
 
 def validatePythonVersion():
     versionInfo = sys.version_info
@@ -20,23 +27,31 @@ def validatePythonVersion():
     return True
 
 
-def getItasInstallationPath():
-    itasPath = os.path.abspath(__file__)
-    itasPath = os.path.dirname(itasPath)
-    return os.path.expanduser(itasPath)
+def getTusiExamplerInstallationPath():
+    tusiexamplePath = os.path.abspath(__file__)
+    tusiexamplePath = os.path.dirname(tusiexamplePath)
+    return os.path.expanduser(tusiexamplePath)
 
 
-def setupItas():
+def setupTusiExample():
     # Install tusi-example with pip.
     try:
         # Get installation path automatically.
-        itasPath = getItasInstallationPath()
+        tusiexamplePath = getTusiExamplerInstallationPath()
 
-        argv_fixed = [sys.executable, '-m', 'pip', '--disable-pip-version-check', 'install']
         if is_virtual_env():
-            argv = argv_fixed + ['-e', itasPath]
+            argv_fixed = [sys.executable, '-m', 'pip', '--disable-pip-version-check', 'install']
+            argv = argv_fixed + ['-e', tusiexamplePath]
         else:
-            argv = argv_fixed + ['--user', '-e', itasPath]
+            if check_msys64_installed():
+                if is_msys2_env():
+                    argv =[pathlib.Path.home().drive+"\msys64\mingw64.exe"]
+                else:
+                    print("Not in msys2 python environment")
+                    return False
+            else:
+                argv_fixed = [sys.executable, '-m', 'pip', '--disable-pip-version-check', 'install']
+                argv = argv_fixed + ['--user', '-e', tusiexamplePath]
 
         try:
             subprocess.run(argv, check=True)
@@ -51,7 +66,7 @@ def setupItas():
     return True
 
 
-def install(args):
+def install():
     print('############################################')
     print('Start setup tusi-example')
 
@@ -59,7 +74,7 @@ def install(args):
     if not validatePythonVersion():
         return False
 
-    if not setupItas():
+    if not setupTusiExample():
         print('==============')
         print('Failed to setup tusi-example')
         return False

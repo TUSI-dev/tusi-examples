@@ -66,8 +66,7 @@ windows_requirements = [
     'pypiwin32>=220',
     'pywin32>=224',
     'PyQt5==5.13.0',
-    'PyQt5-tools==5.15.1.3',
-    'win32wifi>=0.1.0'
+    'PyQt5-tools==5.15.1.3'
 ]
 
 pi_requirements = [
